@@ -36,22 +36,26 @@ extern "C" {
  */
 LIBPFF_EXTERN \
 int libpff_file_open_file_io_handle(
-     libpff_file_t *file,
-     libbfio_handle_t *file_io_handle,
-     int access_flags,
-     libpff_error_t **error );
+      libpff_file_t *file,
+      libbfio_handle_t *file_io_handle,
+      int access_flags,
+      libpff_error_t **error );
 
 #endif /* !defined( LIBPFF_HAVE_BFIO ) */
 
 int LLVMFuzzerTestOneInput(
-     const uint8_t *data,
-     size_t size )
+      const uint8_t *data,
+      size_t size )
 {
 	libbfio_handle_t *file_io_handle = NULL;
 	libpff_file_t *file              = NULL;
 	libpff_item_t *root_folder       = NULL;
 	libpff_item_t *sub_item          = NULL;
-	int number_of_sub_items          = 0;
+	uint8_t item_type               = 0;
+	uint32_t identifier             = 0;
+	uint32_t number_of_entries      = 0;
+	int number_of_record_sets       = 0;
+	int number_of_sub_items         = 0;
 
 	if( libbfio_memory_range_initialize(
 	     &file_io_handle,
@@ -86,6 +90,20 @@ int LLVMFuzzerTestOneInput(
 	     &root_folder,
 	     NULL ) == 1 )
 	{
+		if( libpff_item_get_identifier(
+		     root_folder,
+		     &identifier,
+		     NULL ) != 1 )
+		{
+			goto on_error_libpff_root_folder;
+		}
+		if( libpff_item_get_type(
+		     root_folder,
+		     &item_type,
+		     NULL ) != 1 )
+		{
+			goto on_error_libpff_root_folder;
+		}
 		if( libpff_item_get_number_of_sub_items(
 		     root_folder,
 		     &number_of_sub_items,
@@ -103,11 +121,40 @@ int LLVMFuzzerTestOneInput(
 			{
 				goto on_error_libpff_root_folder;
 			}
+			if( libpff_item_get_identifier(
+			     sub_item,
+			     &identifier,
+			     NULL ) != 1 )
+			{
+				goto on_error_libpff_sub_item;
+			}
+			if( libpff_item_get_type(
+			     sub_item,
+			     &item_type,
+			     NULL ) != 1 )
+			{
+				goto on_error_libpff_sub_item;
+			}
+			if( libpff_item_get_number_of_entries(
+			     sub_item,
+			     &number_of_entries,
+			     NULL ) != 1 )
+			{
+				goto on_error_libpff_sub_item;
+			}
+			if( libpff_item_get_number_of_record_sets(
+			     sub_item,
+			     &number_of_record_sets,
+			     NULL ) != 1 )
+			{
+				goto on_error_libpff_sub_item;
+			}
+ on_error_libpff_sub_item:
 			libpff_item_free(
 			 &sub_item,
 			 NULL );
 		}
-on_error_libpff_root_folder:
+ on_error_libpff_root_folder:
 		libpff_item_free(
 		 &root_folder,
 		 NULL );
@@ -130,4 +177,3 @@ on_error_libbfio:
 }
 
 } /* extern "C" */
-

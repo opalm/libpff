@@ -3449,6 +3449,17 @@ int libpff_table_read_record_entries(
 
 		return( -1 );
 	}
+	if( record_entries_level > LIBPFF_MAXIMUM_TABLE_RECORD_ENTRIES_LEVEL )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_RUNTIME,
+		 LIBCERROR_RUNTIME_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid record entries level value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
 #if defined( HAVE_DEBUG_OUTPUT )
 	if( libcnotify_verbose != 0 )
 	{
@@ -8253,6 +8264,20 @@ int libpff_table_read_values_array(
 
 		return( -1 );
 	}
+	/* Make sure the values array entries are large enough to contain the
+	 * 4-byte values array entry identifier
+	 */
+	if( values_array_entry_size < 4 )
+	{
+		libcerror_error_set(
+		 error,
+		 LIBCERROR_ERROR_DOMAIN_ARGUMENTS,
+		 LIBCERROR_ARGUMENT_ERROR_VALUE_OUT_OF_BOUNDS,
+		 "%s: invalid values array entry size value out of bounds.",
+		 function );
+
+		return( -1 );
+	}
 	if( column_definitions_array == NULL )
 	{
 		libcerror_error_set(
@@ -8710,7 +8735,7 @@ int libpff_table_read_values_array(
 				/* For some unknown reason when the values array is read
 				 * the data array is padded with zero or remnant values
 				 * therefore the values array entries do not align
-				 * this check is makes sure the aligment is correct
+				 * this check is makes sure the alignment is correct
 				 */
 				if( column_definition_index == 0 )
 				{
